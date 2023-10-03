@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "QR Code generator (png, svg, pdf, eps)",
   "homepage": "https://github.com/alex-knyaz/tiny-qr",
-  "keywords": [ "qrcode", "qr code", "qr", "svg", "image" ],
+  "keywords": ["qrcode", "qr code", "qr", "svg", "image"],
   "author": {
     "name": "alex-knyaz",
     "url": "https://alex-knyaz.github.io/"
@@ -21,5 +21,8 @@
   "files": [
     "lib",
     "LICENSE"
-  ]
+  ],
+  "dependencies": {
+    "qr-image": "^3.2.0"
+  }
 }

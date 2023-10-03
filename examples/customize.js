@@ -3,7 +3,7 @@
 
 const qr = require('../lib/qr.js');
 
-function coord2offset(x, y, size) {
+const coord2offset = (x, y, size) => {
     return (size + 1) * y + x + 1;
 }
 
@@ -21,7 +21,7 @@ function coord2offset(x, y, size) {
  * Each <xx> is a pixel of image. It's value 0 — black, 255 — white,
    everything between are shades of gray.
  */
-function customize(bitmap) {
+const customize = (bitmap) => {
     const size = bitmap.size;
     const data = bitmap.data;
 

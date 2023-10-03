@@ -2,7 +2,7 @@ var http = require('http');
 var url = require('url');
 const qr = require('../lib/qr.js');
 
-http.createServer(function (req, res) {
+http.createServer(const  = (req, res) => {
     var text = url.parse(req.url, true).query.text;
     try {
         var img = qr.image(text);
