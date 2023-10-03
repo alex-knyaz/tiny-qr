@@ -1,14 +1,16 @@
 "use strict";
 
-const encode = require('./encode');
-const calculateEC = require('./errorcode');
-const matrix = require('./matrix');
+import encode from './encode.js';
+import calculateEC from './errorcode.js';
+import matrix from './matrix.js';
 
-// import {default as calculate_ec} from './errorcode';
+const version_deep_copy = (obj) => {
+    let res = Object.assign({}, obj);
+    res.blocks = [...res.blocks];
+    res.ec = [...res.ec];
+    return res;
+};
 
-const _deepCopy = (obj) => {
-    return JSON.parse(JSON.stringify(obj));
-}
 
 const EC_LEVELS = ['L', 'M', 'Q', 'H'];
 
@@ -58,14 +60,15 @@ let versions = [
     [3706, 750, 25, 1372, 49, 2040, 68, 2430, 81] // 40
 ];
 
-versions = versions.map(function(v, index) {
+versions = versions.map((v, index) => {
     if (!index) return {};
     let res = {}
 
     for (let i = 1; i < 8; i += 2) {
         let length = v[0] - v[i];
-        let num_template = v[i+1];
-        let ec_level = EC_LEVELS[(i/2)|0];
+        let num_template = v[i + 1];
+        let ec_level = EC_LEVELS[(i / 2) | 0];
+
         let level = {
             version: index,
             ec_level: ec_level,
@@ -76,15 +79,16 @@ versions = versions.map(function(v, index) {
         }
 
         for (let k = num_template, n = length; k > 0; k--) {
-            let block = (n / k)|0;
+            let block = (n / k) | 0;
             level.blocks.push(block);
             n -= block;
-
         }
+
         res[ec_level] = level;
     }
     return res;
 });
+
 
 // {{{1 Get version template
 const getTemplate = (message, ec_level) => {
@@ -98,9 +102,7 @@ const getTemplate = (message, ec_level) => {
     }
     for (/* i */; i < 10; i++) {
         let version = versions[i][ec_level];
-        if (version.data_len >= len) {
-            return _deepCopy(version);
-        }
+        if (version.data_len >= len) return version_deep_copy(version);
     }
 
     if (message.data10) {
@@ -108,26 +110,22 @@ const getTemplate = (message, ec_level) => {
     } else {
         i = 27;
     }
+
     for (/* i */; i < 27; i++) {
         let version = versions[i][ec_level];
-        if (version.data_len >= len) {
-            return _deepCopy(version);
-        }
+        if (version.data_len >= len) return version_deep_copy(version);
     }
-
     len = Math.ceil(message.data27.length / 8);
     for (/* i */; i < 41; i++) {
         let version = versions[i][ec_level];
-        if (version.data_len >= len) {
-            return _deepCopy(version);
-        }
+        if (version.data_len >= len) return version_deep_copy(version);
     }
     throw new Error("Too much data");
 }
 
 // {{{1 Fill template
 const fillTemplate = (message, template) => {
-    let blocks = new Buffer(template.data_len);
+    let blocks = new Uint8Array(template.data_len);
     blocks.fill(0);
 
     if (template.version < 10) {
@@ -155,18 +153,17 @@ const fillTemplate = (message, template) => {
     }
 
     let offset = 0;
-    template.blocks = template.blocks.map(function(n) {
+    template.blocks = template.blocks.map(function (n) {
         let b = blocks.slice(offset, offset + n);
         offset += n;
         template.ec.push(calculateEC(b, template.ec_len));
         return b;
     });
-
     return template;
 }
 
 // {{{1 All-in-one
-const QR = (text, ec_level, parse_url) => {
+const bit_matrix = (text, ec_level, parse_url) => {
     ec_level = EC_LEVELS.indexOf(ec_level) > -1 ? ec_level : 'M';
     let message = encode(text, parse_url);
     let data = fillTemplate(message, getTemplate(message, ec_level));
@@ -174,19 +171,49 @@ const QR = (text, ec_level, parse_url) => {
 }
 
 const get_ASCII_image = (text, ec_level, parse_url) => {
-    const matrix = QR(text, ec_level, parse_url);
+    const matrix = bit_matrix(text, ec_level, parse_url);
     let string = "";
     matrix.forEach((row) => {
-      row.forEach((cell) => string += cell? '██' : '  ');
-      string += '\n';
+        row.forEach((cell) => string += cell ? '██' : '\u2000\u2000');
+        string += '\n';
     });
     return string;
-  }
+}
+
+const get_html_image = (text, ec_level, parse_url, cell_size = '15px', style_filled = 'background-color: black;') => {
+    const matrix = bit_matrix(text, ec_level, parse_url);
+    let cols_count = matrix[0].length;
+    let string = `<div style='display: grid; grid-template-columns: repeat(${cols_count}, ${cell_size});'>`;
+    const add_span = (block_start, block_count) =>
+        string += `<span style="${style_filled} grid-column: ${block_start} / span ${block_count};">&nbsp;</span>`;
+
+    for (let i = 0; i < matrix.length; i++) {
+        let prev = matrix[i][0];
+        let block_start = 1;
+        let block_count = 0;
+
+        for (let j = 0; j < matrix[i].length; j++) {
+            if (prev == matrix[i][j]) { block_count++; continue; }
+
+            if (prev) {
+                add_span(block_start, block_count);
+            } else {
+                block_start = j + 1;
+            }
+
+            block_count = 1;
+            prev = matrix[i][j];
+        }
+        if (prev) add_span(block_start, block_count);
+    }
+
+    string += "</div>";
+    return string;
+}
 
 // {{{1 export functions
-module.exports = {
-    QR: QR,
-    get_ASCII_image: get_ASCII_image,
-    getTemplate: getTemplate,
-    fillTemplate: fillTemplate,
+export {
+    bit_matrix,
+    get_ASCII_image,
+    get_html_image
 }

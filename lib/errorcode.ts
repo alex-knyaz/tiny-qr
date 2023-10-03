@@ -3,25 +3,20 @@
 // {{{1 Galois Field Math
 const GF256_BASE = 285;
 
-let EXP_TABLE = [1];
-let LOG_TABLE = [];
+let EXP_TABLE : number[] = [1];
+let LOG_TABLE : number[] = [];
 
 for (let i = 1; i < 256; i++) {
     let n = EXP_TABLE[i - 1] << 1;
     if (n > 255) n = n ^ GF256_BASE;
     EXP_TABLE[i] = n;
+    LOG_TABLE[n] = i
 }
 
-for (let i = 0; i < 255; i++) LOG_TABLE[EXP_TABLE[i]] = i;
+const exp = (k: number) => EXP_TABLE[(k % 255 + 255) % 255];
 
-
-const exp = (k) => EXP_TABLE[(k % 255 + 255) % 255];
-
-
-const log = (k) => {
-    if (k < 1 || k > 255) {
-        throw Error('Bad log(' + k + ')');
-    }
+const log = (k: number) => {
+    if (k < 1 || k > 255) throw Error('Bad log(' + k + ')');
     return LOG_TABLE[k];
 }
 
@@ -33,12 +28,11 @@ let POLYNOMIALS = [
     // and so on...
 ];
 
-const generatorPolynomial = (num) => {
-    if (POLYNOMIALS[num]) {
-        return POLYNOMIALS[num];
-    }
+const generatorPolynomial = (num: number) => {
+    if (POLYNOMIALS[num]) return POLYNOMIALS[num];
+
     let prev = generatorPolynomial(num - 1);
-    let res = [];
+    let res: number[] = [];
 
     res[0] = prev[0];
     for (let i = 1; i <= num; i++) {
@@ -49,7 +43,7 @@ const generatorPolynomial = (num) => {
 }
 
 // {{{1 export functions
-module.exports = calculate_ec = (msg, ec_len) => {
+const calculate_ec = (msg: Uint8Array, ec_len: number) => {
     // `msg` could be array or buffer
     // convert `msg` to array
     msg = [].slice.call(msg);
@@ -69,9 +63,7 @@ module.exports = calculate_ec = (msg, ec_len) => {
         }
         msg.shift();
     }
-    return new Buffer(msg);
+    return new Uint8Array(msg);
 }
 
-// module.exports = {
-//     calculate_ec: calculate_ec
-// }
+export default calculate_ec;

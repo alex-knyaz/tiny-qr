@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>tiny-qr-test</title>
+    <style>
+        pre {
+            line-height: 1;    
+            font-family: monospace; font-size:1em;
+            background: wheat;
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+    <pre id="qr1"></pre>
+    <br>
+    <pre id="qr2"></pre>
+    <script type="module">
+        import {get_html_image} from './dist/tiny-qr.js';
+        document.getElementById('qr1').innerHTML = get_html_image('Hello, World!').replace('  ', '\u00a0\u00a0');
+
+        document.getElementById('qr2').innerHTML = get_html_image('http://169.254.80.229:3000');
+    </script>
+</body>
+
+</html>

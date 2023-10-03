@@ -1,22 +1,27 @@
 "use strict";
 
-const pushBits = (arr, n, value) => {
-    for (let bit = 1 << (n - 1); bit; bit = bit >>> 1) arr.push(bit & value ? 1 : 0);
+
+
+type bit = 0 | 1
+
+const pushBits = (arr: bit[], n: number, value: number) => {
+    // x is mask
+    for (let x = 1 << (n - 1); x; x = x >>> 1) arr.push(x & value ? 1 : 0);
 }
 
 // {{{1 8bit encode
-const encode_8bit = (data) => {
+const encode_8bit = (data: Uint8Array) => {
     let len = data.length;
     let bits = [];
     for (let i = 0; i < len; i++) pushBits(bits, 8, data[i]);
     let res = {};
 
-    let d = [0, 1, 0, 0];
+    let d: bit[] = [0, 1, 0, 0];
     pushBits(d, 16, len);
     res.data10 = res.data27 = d.concat(bits);
 
     if (len < 256) {
-        let d = [0, 1, 0, 0];
+        let d: bit[] = [0, 1, 0, 0];
         pushBits(d, 8, len);
         res.data1 = d.concat(bits);
     }
@@ -31,13 +36,15 @@ const ALPHANUM = ((s) => {
     return res;
 })('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:');
 
-const encode_alphanum = (str) => {
+const encode_alphanum = (str: string) => {
+
     let len = str.length;
     let bits = [];
 
     for (let i = 0; i < len; i += 2) {
         let b = 6;
         let n = ALPHANUM[str[i]];
+
         if (str[i + 1]) {
             b = 11;
             n = n * 45 + ALPHANUM[str[i + 1]];
@@ -47,18 +54,18 @@ const encode_alphanum = (str) => {
 
     let res = {};
 
-    let d = [0, 0, 1, 0];
+    let d: bit[] = [0, 0, 1, 0];
     pushBits(d, 13, len);
     res.data27 = d.concat(bits);
 
     if (len < 2048) {
-        let d = [0, 0, 1, 0];
+        let d: bit[] = [0, 0, 1, 0];
         pushBits(d, 11, len);
         res.data10 = d.concat(bits);
     }
 
     if (len < 512) {
-        let d = [0, 0, 1, 0];
+        let d: bit[] = [0, 0, 1, 0];
         pushBits(d, 9, len);
         res.data1 = d.concat(bits);
     }
@@ -67,7 +74,7 @@ const encode_alphanum = (str) => {
 }
 
 // {{{1 numeric encode
-const encode_numeric = (str) => {
+const encode_numeric = (str: string) => {
     let len = str.length;
     let bits = [];
 
@@ -79,18 +86,18 @@ const encode_numeric = (str) => {
 
     let res = {};
 
-    let d = [0, 0, 0, 1];
+    let d: bit[] = [0, 0, 0, 1];
     pushBits(d, 14, len);
     res.data27 = d.concat(bits);
 
     if (len < 4096) {
-        let d = [0, 0, 0, 1];
+        let d: bit[] = [0, 0, 0, 1];
         pushBits(d, 12, len);
         res.data10 = d.concat(bits);
     }
 
     if (len < 1024) {
-        let d = [0, 0, 0, 1];
+        let d: bit[] = [0, 0, 0, 1];
         pushBits(d, 10, len);
         res.data1 = d.concat(bits);
     }
@@ -99,13 +106,12 @@ const encode_numeric = (str) => {
 }
 
 // {{{1 url encode
-const encode_url = (str) => {
+const encode_url = (str: string) => {
     let slash = str.indexOf('/', 8) + 1 || str.length;
     let res = encode(str.slice(0, slash).toUpperCase(), false);
 
-    if (slash >= str.length) {
-        return res;
-    }
+    if (slash >= str.length) return res;
+    
 
     let path_res = encode(str.slice(slash), false);
     res.data27 = res.data27.concat(path_res.data27);
@@ -122,17 +128,18 @@ const encode_url = (str) => {
 }
 
 // {{{1 Choose encode mode and generates struct with data for different version
-const encode = (data, parse_url) => {
+const encode = (data: string | number | Uint8Array, parse_url: boolean) => {
     let str;
     let t = typeof data;
 
+
     if (t == 'string' || t == 'number') {
         str = '' + data;
-        data = new Buffer(str);
-    } else if (Buffer.isBuffer(data)) {
+        data = (new TextEncoder()).encode(str);
+    } else if (data instanceof Uint8Array) {
         str = data.toString();
     } else if (Array.isArray(data)) {
-        data = new Buffer(data);
+        data = (new TextEncoder()).encode(str);
         str = data.toString();
     } else {
         throw new Error("Bad data");
@@ -161,4 +168,4 @@ const encode = (data, parse_url) => {
 }
 
 // {{{1 export functions
-module.exports = encode;
+export default encode;

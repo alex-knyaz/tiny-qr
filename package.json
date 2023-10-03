@@ -1,7 +1,7 @@
 {
-  "name": "qr-image",
+  "name": "tiny-qr",
   "version": "0.1.0",
-  "description": "QR Code generator (png, svg, pdf, eps)",
+  "description": "QR Code generator",
   "homepage": "https://github.com/alex-knyaz/tiny-qr",
   "keywords": ["qrcode", "qr code", "qr", "svg", "image"],
   "author": {
@@ -16,13 +16,16 @@
   "bugs": "https://github.com/alex-knyaz/tiny-qr/issues",
   "main": "./lib/qr.js",
   "scripts": {
-    "test": "./tests/test.js"
+    "build-examples": "bun build ./lib/qr-base.js --target=browser > ./examples/dist/tiny-qr.js",
+    "build": "bun build ./lib/qr-base.js --minify --target=browser > ./dist/tiny-qr.js",
+    "example-terminal": "bun run ./examples/terminal.js",
+    "example-browser": "bunx serve ./examples"
   },
   "files": [
     "lib",
     "LICENSE"
   ],
-  "dependencies": {
+  "dev-dependencies": {
     "qr-image": "^3.2.0"
   }
 }

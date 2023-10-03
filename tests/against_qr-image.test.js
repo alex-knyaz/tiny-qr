@@ -1,4 +1,4 @@
-import { QR as QR_new } from '../lib/qr-base.js';
+import { bit_matrix as QR_new } from '../lib/qr-base.js';
 const qr_old = require('qr-image');
 
 
@@ -11,6 +11,12 @@ const test_template = (text, ec_level, parse_url) => {
 
 test('QR function generates the same QR code as qr-image package', () =>
   test_template('Hello, World!', 'H', false));
+
+test('QR function generates the same QR code as qr-image package', () =>
+  test_template('0123456789qwertyuiopasdfghjklzxcvbnm', 'H', false));
+
+test('QR function generates the same QR code as qr-image package', () =>
+  test_template('0123456789', 'H', false));
 
 test('QR function generates the same QR code as qr-image package (with different input)', () => {
   test_template('Testing QR codes', 'L', true);
@@ -45,7 +51,7 @@ test('Fuzzing-style test: QR function generates the same QR code as qr-image pac
     return result;
   };
 
-  const numTests = 100;
+  const numTests = 10000;
   for (let i = 0; i < numTests; i++) {
     const text = getRandomText();
     const ec_level = ['L', 'M', 'Q', 'H'][Math.floor(Math.random() * 4)]; // Random EC level
