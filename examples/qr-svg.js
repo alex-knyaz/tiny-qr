@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var qr = require('../');
+var qr = require('../lib/qr.js');
 var text = process.argv.slice(2).join(' ');
 
 if (!text) {

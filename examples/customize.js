@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
-const qr = require('../');
+const qr = require('../lib/qr.js');
 
 function coord2offset(x, y, size) {
     return (size + 1) * y + x + 1;
