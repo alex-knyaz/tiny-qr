@@ -180,10 +180,17 @@ const get_ASCII_image = (text, ec_level, parse_url) => {
     return string;
 }
 
-const get_html_image = (text, ec_level, parse_url, cell_size = '15px', style_filled = 'background-color: black;') => {
+const get_html_image = (
+    text, ec_level, parse_url,
+    cell_size = '5px',
+    style_filled = 'background-color: black;',
+    max_size = null) => {
     const matrix = bit_matrix(text, ec_level, parse_url);
     let cols_count = matrix[0].length;
-    let string = `<div style='display: grid; grid-template-columns: repeat(${cols_count}, ${cell_size});'>`;
+    if (max_size)
+        cell_size = max_size / cols_count + 'px';
+    let string = `<div style='display: grid; grid-template-columns: repeat(${cols_count}, ${cell_size});grid-auto-rows: ${cell_size};'>`;
+
     const add_span = (block_start, block_count) =>
         string += `<span style="${style_filled} grid-column: ${block_start} / span ${block_count};">&nbsp;</span>`;
 

@@ -1,9 +1,15 @@
 {
-  "name": "tiny-qr",
-  "version": "0.1.0",
+  "name": "@alex-knyaz/tiny-qr",
+  "version": "0.1.2",
   "description": "QR Code generator",
   "homepage": "https://github.com/alex-knyaz/tiny-qr",
-  "keywords": ["qrcode", "qr code", "qr", "svg", "image"],
+  "keywords": [
+    "qrcode",
+    "qr code",
+    "qr",
+    "svg",
+    "image"
+  ],
   "author": {
     "name": "alex-knyaz",
     "url": "https://alex-knyaz.github.io/"
@@ -11,18 +17,18 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/alex-knyaz/tiny-qr.git"
+    "url": "git+https://github.com/alex-knyaz/tiny-qr.git"
   },
   "bugs": "https://github.com/alex-knyaz/tiny-qr/issues",
-  "main": "./lib/qr.js",
+  "main": "./dist/tiny-qr.js",
   "scripts": {
     "build-examples": "bun build ./lib/qr-base.js --target=browser > ./examples/dist/tiny-qr.js",
-    "build": "bun build ./lib/qr-base.js --minify --target=browser > ./dist/tiny-qr.js",
+    "build": "bun build ./lib/qr-base.js --target=browser > ./dist/tiny-qr.js",
     "example-terminal": "bun run ./examples/terminal.js",
     "example-browser": "bunx serve ./examples"
   },
   "files": [
-    "lib",
+    "dist",
     "LICENSE"
   ],
   "dev-dependencies": {
